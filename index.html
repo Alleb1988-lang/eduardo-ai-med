@@ -1,0 +1,87 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Доктор Eduardo — ИИ-врач</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      display: flex;
+      height: 100vh;
+    }
+    #camera, #eduardo {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #f3f3f3;
+    }
+    video {
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.3);
+    }
+    canvas {
+      max-width: 100%;
+      max-height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="camera">
+    <video id="userVideo" autoplay playsinline muted width="480" height="360"></video>
+  </div>
+  <div id="eduardo">
+    <canvas id="threeCanvas"></canvas>
+  </div>
+
+  <script src="three.min.js"></script>
+  <script src="GLTFLoader.js"></script>
+  <script>
+    // Подключение камеры
+    const video = document.getElementById('userVideo');
+    navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+      .then(stream => { video.srcObject = stream });
+
+    // Сцена Three.js
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('threeCanvas'), alpha: true });
+    renderer.setSize(480, 360);
+    camera.position.z = 2;
+
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(1, 1, 2);
+    scene.add(light);
+
+    const loader = new THREE.GLTFLoader();
+    loader.load('eduardo.glb', function(gltf) {
+      const model = gltf.scene;
+      model.scale.set(1.5, 1.5, 1.5);
+      model.position.y = -0.6;
+      scene.add(model);
+      animate();
+    });
+
+    function animate() {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    }
+
+    // Голос Eduardo
+    function speak(text) {
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.lang = 'ru-RU';
+      msg.rate = 1;
+      msg.pitch = 1;
+      speechSynthesis.speak(msg);
+    }
+
+    // Пример автоответа
+    setTimeout(() => {
+      speak("Здравствуйте! Чем могу помочь?");
+    }, 2000);
+  </script>
+</body>
+</html>
